@@ -1,0 +1,3 @@
+- svg pieces
+- check for win
+- place piece on board
