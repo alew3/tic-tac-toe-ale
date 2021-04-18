@@ -19,12 +19,14 @@ components: {
  props: {
     index: Number,
   },
+  emits: ["board-clicked"],
   computed: {
     ...mapState(["boardState"]),
   },
   methods: {
     Clicked() {
-      Board.play(this.boardState,this.index)
+      console.log("emiiting event",this.index)
+      this.$emit("board-clicked", this.index);
     },
     getPieceImage() {
       return Board.getPieceImage(this.boardState,this.index)

@@ -1,7 +1,5 @@
 import { PIECETYPE } from "../constants";
 import { BoardState } from "./BoardState";
-import cloneDeep from 'lodash/cloneDeep';
-
 
 export class Board {
 
@@ -13,14 +11,28 @@ export class Board {
         boardState.squares[pos] = pieceType
     }
 
+    // get empty squares
     static getAllowedMoves(squares) {
         let alllowedMoves = new Array()
-        for(let i=0;i<squares.length;i++) {
-            if (squares[i]==PIECETYPE.NONE)
-                alllowedMoves.push(i)
-        }
-        //console.log(alllowedMoves)
+
+        // method 1 - fastest
+        // for(let i=0;i<squares.length;i++) {
+        //     if (squares[i]==PIECETYPE.NONE)
+        //         alllowedMoves.push(i)
+        // }
+
+        // method 2
+        //let alllowedMoves = squares.map((square, i) => square === PIECETYPE.NONE ? i : -1).filter(index => index !=-1)
+        
+        // method 3 - slowest
+        //let alllowedMoves = squares.flatMap((square, i) => square === PIECETYPE.NONE ? i : []);
+
+        // method 4 - fastest
+        squares.forEach((square, index) => square === PIECETYPE.NONE ? alllowedMoves.push(index) : null)
+
+
         return alllowedMoves
+
     }
 
     static getPieceName(value) {
@@ -42,35 +54,89 @@ export class Board {
     }
 
     static search(boardState) {
-        let count = Board.searchBranch(boardState,0,boardState.playerTurn)
-        return count
-    }
+        console.time("search")
+        this.playerturn_wins = 0
+        this.opponent_wins = 0
+        this.draws = 0
+        this.count = 0
+        this.recommendedMove = -1
+        console.log("PLAYER_TURN=",boardState.playerTurn)
+        let score = Board.minimax(boardState.squares,0,boardState.playerTurn)
 
-    static searchBranch(boardState,depth,player) {
-        // get allowed moves
-        let count = 0
-        let possibleMoves = Board.getAllowedMoves(boardState.squares)
-        let opponent = (player==PIECETYPE.CROSS?PIECETYPE.CIRCLE:PIECETYPE.CROSS)
-
-        for(let i=0;i<possibleMoves.length;i++) {
-            let cloneState = cloneDeep(boardState) 
-            Board.setPieceAt(cloneState,player,possibleMoves[i]) 
-            cloneState.playerTurn = opponent
-
-            if (Board.verifyWin(boardState.squares,PIECETYPE.CIRCLE)) {
-                return count
-            }
         
-            if (Board.verifyWin(boardState.squares,PIECETYPE.CROSS)) {
-                return count
-            }
-            count++
-            count += Board.searchBranch(cloneState,depth++,opponent)
-        }
-        return count
+        console.timeEnd("search")
+        // console.log("PLAYER WINS=", this.playerturn_wins)
+        // console.log("OPPONENT WINS=", this.opponent_wins)
+        // console.log("DRAWS=", this.draws)
+        // console.log("TOTALGAMES=", this.playerturn_wins+this.opponent_wins+this.draws)
+        // console.log("POSSIBLE PATHS=", this.count)
+
+        // get max points
+        console.log("RECOMMENDED MOVE:",this.recommendedMove)
+        //console.log("AI RECOMMENDED MOVE=",possibleMoves[recommendedMove])
+        return this.recommendedMove
     }
 
 
+    // use the minimax algorithm to select a move
+    static minimax(squares,depth,playerTurn,maximize=true) {
+
+        let possibleMoves = Board.getAllowedMoves(squares)
+        //console.log("POSSIBLE MOVES",possibleMoves," DEPTH=",depth)
+        let opponent = Board.getAlternatePlayer(playerTurn)
+
+        if (possibleMoves.length==0) {
+            //console.log("it's a draw")
+            this.draws++
+            return 0
+        }
+
+        if (Board.verifyWin(squares,playerTurn)) {
+           // console.log(squares,playerTurn," has won")
+            this.playerturn_wins++
+            return -10
+        }
+
+        if (Board.verifyWin(squares,opponent)) {
+            //console.log(squares,opponent," has won")
+            this.opponent_wins++
+            return +10
+        }
+
+        if (maximize) {
+            let maxEval = -1000
+            let score = new Array(possibleMoves)
+            for(let i=0;i<possibleMoves.length;i++) {
+                let cloneSquares = JSON.parse(JSON.stringify(squares))
+                cloneSquares[possibleMoves[i]] = playerTurn
+                score[i] = Board.minimax(cloneSquares,depth+1,opponent,false)
+            }
+            maxEval = Math.max(maxEval,...score)
+            this.recommendedMove = possibleMoves[score.indexOf(maxEval)]
+
+            // console.log("MOVES:",possibleMoves)
+            // console.log("SCORES:",score)
+            // console.log("MAXEVAL:",maxEval)
+
+            return maxEval
+        } else {
+            let minEval = +1000
+            let score = new Array(possibleMoves)
+            for(let i=0;i<possibleMoves.length;i++) {
+                let cloneSquares = JSON.parse(JSON.stringify(squares))
+                cloneSquares[possibleMoves[i]] = playerTurn
+                score[i] = Board.minimax(cloneSquares,depth+1,opponent,true)
+            }
+            minEval = Math.min(minEval,...score)
+            this.recommendedMove = possibleMoves[score.indexOf(minEval)]
+
+            // console.log("MOVES:",possibleMoves)
+            // console.log("SCORES:",score)
+            // console.log("MINEVAL:",minEval)
+
+            return minEval
+        }
+    }
 
     static play(boardState,pos) {
         // game has already ended
@@ -103,7 +169,7 @@ export class Board {
         }
 
         // change turns
-        boardState.playerTurn = (boardState.playerTurn==PIECETYPE.CROSS?PIECETYPE.CIRCLE:PIECETYPE.CROSS)            
+        boardState.playerTurn = Board.getAlternatePlayer(boardState.playerTurn) 
     }
 
     static verifyWin(squares,player) {
@@ -118,5 +184,9 @@ export class Board {
         }
 
         return false
+    }
+
+    static getAlternatePlayer(player) {
+        return (player==PIECETYPE.CROSS?PIECETYPE.CIRCLE:PIECETYPE.CROSS)            
     }
 }
