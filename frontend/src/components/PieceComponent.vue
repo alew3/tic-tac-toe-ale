@@ -14,11 +14,15 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 
 .piece {
   width: 100%;
   height: 100%;
+}
+
+img {
+  pointer-events: none;
 }
 
 </style>

@@ -3,12 +3,14 @@
         <button class="m-2" @click="reset">Reset Board</button>
         <button class="m-2">Player Turn {{PlayerTurn}}</button>
         <button class="m-2">Ended {{boardState.ended}}</button>
+        <button class="m-2" @click="search">Search Tree</button>
+
         <button v-if="PlayerWon!=0" class="m-2 bg-red-500">Player WON {{PlayerWon}}</button>
     </div>
 
-    <div>
-      Opponent: 
-      <input type="radio" id="human" name="opponent" value="human"><label for="human">Human</label> 
+    <div class="opponent">
+      <h2>Opponent</h2> 
+      <input type="radio" id="human" name="opponent" value="human"  checked="checked"><label for="human">Human</label> 
       <input type="radio" id="minmax" name="opponent" value="minmax"><label for="human">MinMax</label> 
       <input type="radio" id="supervised" name="opponent" value="supervised"><label for="human">SuperVised</label>
       <input type="radio" id="reinforcement" name="opponent" value="reinforcement"><label for="human">Reinforcement</label>
@@ -55,6 +57,11 @@ export default defineComponent({
     methods: {
       reset() {
         Board.resetBoard(this.boardState)
+      },
+      search() {
+        console.log("BEGIN SEARCH")
+        console.log("Found possible paths",Board.search(this.boardState,PIECETYPE.CROSS))
+        console.log("END SEARCH")
       }
     }
   
@@ -90,5 +97,9 @@ export default defineComponent({
   padding: 0;
   margin: 0;
   background-color: grey;
+}
+
+.opponent > label {
+  @apply m-3
 }
 </style>

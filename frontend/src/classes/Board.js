@@ -1,7 +1,10 @@
 import { PIECETYPE } from "../constants";
 import { BoardState } from "./BoardState";
+import cloneDeep from 'lodash/cloneDeep';
+
 
 export class Board {
+
     static getPieceAt(boardState,pos) {
         return boardState.squares[pos]
     }
@@ -10,13 +13,13 @@ export class Board {
         boardState.squares[pos] = pieceType
     }
 
-    static getAllowedMoves(boardState) {
+    static getAllowedMoves(squares) {
         let alllowedMoves = new Array()
-        for(let i=0;i<boardState.squares.length;i++) {
-            if (boardState.squares[i]==PIECETYPE.NONE)
+        for(let i=0;i<squares.length;i++) {
+            if (squares[i]==PIECETYPE.NONE)
                 alllowedMoves.push(i)
         }
-        console.log(alllowedMoves)
+        //console.log(alllowedMoves)
         return alllowedMoves
     }
 
@@ -38,6 +41,37 @@ export class Board {
         boardState = boardState.resetVars()
     }
 
+    static search(boardState) {
+        let count = Board.searchBranch(boardState,0,boardState.playerTurn)
+        return count
+    }
+
+    static searchBranch(boardState,depth,player) {
+        // get allowed moves
+        let count = 0
+        let possibleMoves = Board.getAllowedMoves(boardState.squares)
+        let opponent = (player==PIECETYPE.CROSS?PIECETYPE.CIRCLE:PIECETYPE.CROSS)
+
+        for(let i=0;i<possibleMoves.length;i++) {
+            let cloneState = cloneDeep(boardState) 
+            Board.setPieceAt(cloneState,player,possibleMoves[i]) 
+            cloneState.playerTurn = opponent
+
+            if (Board.verifyWin(boardState.squares,PIECETYPE.CIRCLE)) {
+                return count
+            }
+        
+            if (Board.verifyWin(boardState.squares,PIECETYPE.CROSS)) {
+                return count
+            }
+            count++
+            count += Board.searchBranch(cloneState,depth++,opponent)
+        }
+        return count
+    }
+
+
+
     static play(boardState,pos) {
         // game has already ended
         if (boardState.ended)
@@ -53,7 +87,7 @@ export class Board {
         Board.setPieceAt(boardState,boardState.playerTurn,pos)
 
         // check for win
-        if (Board.verifyWin(boardState,boardState.playerTurn)) {
+        if (Board.verifyWin(boardState.squares,boardState.playerTurn)) {
             console.warn("player:", boardState.playerTurn," has Won! End of game")
             boardState.ended = true
             boardState.winner = boardState.playerTurn
@@ -62,7 +96,7 @@ export class Board {
 
 
         // check for end of game - no more moves
-        if (Board.getAllowedMoves(boardState).length==0) {
+        if (Board.getAllowedMoves(boardState.squares).length==0) {
             console.warn("No more moves, end of game",pos)
             boardState.ended = true
             return
@@ -72,13 +106,13 @@ export class Board {
         boardState.playerTurn = (boardState.playerTurn==PIECETYPE.CROSS?PIECETYPE.CIRCLE:PIECETYPE.CROSS)            
     }
 
-    static verifyWin(boardState,player) {
+    static verifyWin(squares,player) {
 
         let possibleWins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
 
         for (let i=0;i<possibleWins.length;i++) {
-            if (Board.getPieceAt(boardState,possibleWins[i][0])==player && Board.getPieceAt(boardState,possibleWins[i][1])==player && Board.getPieceAt(boardState,possibleWins[i][2])==player) {
-                console.log("Win at ",possibleWins[i])
+            if (squares[possibleWins[i][0]]==player && squares[possibleWins[i][1]]==player && squares[possibleWins[i][2]]==player) {
+                //console.log("Win at ",possibleWins[i])
                 return true
             }
         }
