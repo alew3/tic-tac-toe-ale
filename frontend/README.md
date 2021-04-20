@@ -1,5 +1,7 @@
 # tictactoe-ale
 
+Tic Tac Toe game built on VueJs to test Reinforcement Learning techniques
+
 ## Project setup
 ```
 npm install
