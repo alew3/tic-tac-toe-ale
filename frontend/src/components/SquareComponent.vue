@@ -1,5 +1,5 @@
 <template >
-      <div class="bg-gray-50 h-full w-full border-1 border-red-500 p-0 m-0" @mousedown="Clicked">
+      <div class="bg-gray-80 h-full w-full border-1 border-red-500 p-0 m-0" @mousedown="Clicked">
         <span class="num">{{index}}</span>
         <Piece :pieceImage="getPieceImage()"></Piece>
       </div>
@@ -39,5 +39,6 @@ components: {
 <style scoped>
 .num {
   position: absolute;
+  visibility: hidden;
 }
 </style>

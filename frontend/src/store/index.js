@@ -4,7 +4,7 @@ import { Circle, Cross } from "../classes/Piece";
 import { PIECETYPE } from "../constants";
 
 
-let boardState = new BoardState(['x','o','x','','x','o','','o',''])
+let boardState = new BoardState(['','','','','','','','','']) // (['x','o','','','o','','x','x','o'])
 boardState.playerTurn = PIECETYPE.CROSS
 
 export default createStore({
