@@ -1,5 +1,4 @@
 <template>
-
       <h1>Tic Tac Toe</h1>
       <BoardComponent></BoardComponent>
 </template>

@@ -84,10 +84,10 @@ export default defineComponent({
           return
         } 
 
+        // computer move
         if (this.opponent=='minmax') {
           Board.play(this.boardState,move)
 
-          // computer move
           let computerMove = Board.search(this.boardState)
           if (computerMove!=-1)
             Board.play(this.boardState,computerMove)
