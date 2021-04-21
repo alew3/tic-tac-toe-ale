@@ -1,6 +1,5 @@
 import { createStore } from "vuex";
 import { BoardState } from "@/classes/BoardState";
-import { Circle, Cross } from "../classes/Piece";
 import { PIECETYPE } from "../constants";
 
 
