@@ -2,7 +2,7 @@
 <div>
     <div>
         <button class="m-3" @click="reset">New Game</button>
-        <button class="m-3">Player Turn {{PlayerTurn}}</button>
+        <button class="m-3">Players Turn {{PlayerTurn}}</button>
         <button class="m-3" @click="search">Computer Move</button>
         <button v-if="boardState.ended" class="m-3 bg-red-500">Game Ended</button>
         <button v-if="PlayerWon!=0" class="m-3 bg-red-500">Player WON {{PlayerWon}}</button>
